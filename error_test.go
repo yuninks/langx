@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"code.yun.ink/pkg/langx"
+	"github.com/yuninks/langx"
 )
 
 func TestError(t *testing.T) {

@@ -1,3 +1,3 @@
-module code.yun.ink/pkg/langx
+module github.com/yuninks/langx
 
 go 1.19

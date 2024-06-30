@@ -3,7 +3,7 @@ package langx_test
 import (
 	"testing"
 
-	"code.yun.ink/pkg/langx"
+	"github.com/yuninks/langx"
 )
 
 func TestLangx(t *testing.T) {
