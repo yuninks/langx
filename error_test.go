@@ -19,6 +19,7 @@ func TestError(t *testing.T) {
 	langx.RegisterCode(map[string]int{
 		"login_success": 200,
 		"error":         400,
+		"username":      201,
 	})
 	langx.RegisterTrans("zh", map[string]string{
 		"login_success": "成功",
@@ -35,6 +36,15 @@ func TestError(t *testing.T) {
 	// fmt.Printf("err: %v\n", err)
 	t.Log(err.Error())
 	val, ok := err.(*langx.LangError)
+	if ok {
+		t.Log(val.Code())
+	}
+
+	err = langx.NewErrorFormat(ctx, "username", map[string]string{
+		"name": "yuninks",
+	})
+	t.Log(err.Error())
+	val, ok = err.(*langx.LangError)
 	if ok {
 		t.Log(val.Code())
 	}
