@@ -86,3 +86,7 @@ func GetFormat(lang string, key string, arr map[string]string) string {
 	}
 	return str
 }
+
+func GetDefaultCode() int {
+	return l.ops.defaultCode
+}
