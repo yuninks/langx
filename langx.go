@@ -1,6 +1,7 @@
 package langx
 
 import (
+	"context"
 	"fmt"
 	"strings"
 )
@@ -24,6 +25,7 @@ func init() {
 	}
 }
 
+// 设置
 func InitLangx(ops ...Option) {
 	for _, opt := range ops {
 		opt(l.ops)
@@ -57,6 +59,7 @@ func GetCode(key string) int {
 	return code
 }
 
+// 获取翻译
 func GetMsg(lang string, key string) string {
 	// 找指定语言
 	str, ok := l.transMap[lang]
@@ -78,6 +81,16 @@ func GetMsg(lang string, key string) string {
 	return key
 }
 
+// 从ctx里面获取语言
+func GetMsgCtx(ctx context.Context, key string) string {
+	ctxVal := ctx.Value(l.ops.ctxLangKey)
+	lang := l.ops.defaultLang
+	if ctxVal != nil {
+		lang = ctxVal.(string)
+	}
+	return GetMsg(lang, key)
+}
+
 // 拼接回复
 func GetFormat(lang string, key string, arr map[string]string) string {
 	str := GetMsg(lang, key)
@@ -87,6 +100,7 @@ func GetFormat(lang string, key string, arr map[string]string) string {
 	return str
 }
 
+// 获取默认Code
 func GetDefaultCode() int {
 	return l.ops.defaultCode
 }
