@@ -2,7 +2,11 @@ package langx
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -16,10 +20,8 @@ var l *langx = &langx{}
 
 func init() {
 
-	o := defaultOptions()
-
 	l = &langx{
-		ops:      o,
+		ops:      defaultOptions(),
 		codeMap:  make(map[string]int),
 		transMap: make(map[string]map[string]string),
 	}
@@ -40,6 +42,54 @@ func RegisterCode(datas map[string]int) {
 // 注册语言翻译
 func RegisterTrans(langName string, trans map[string]string) {
 	l.transMap[langName] = trans
+}
+
+
+// 直接读取文件夹获取配置
+// 要求：
+// 1.json格式文件 
+// 2.code.json为自定义响应码 格式map[string]int{}
+// 3.其他的json文件为对应语音 格式map[string]string{}
+// 4.如果json解析错误将会panic
+func RegisterDir(dir string) error {
+	// 遍历dir获取.json的文件
+	err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		if strings.HasSuffix(info.Name(), ".json") {
+			// 读取文件
+			fileName := strings.Replace(info.Name(), ".json", "", 1)
+			by, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			if fileName == "code" {
+				data := map[string]int{}
+				err = json.Unmarshal(by, &data)
+				if err != nil {
+					return err
+				}
+				RegisterCode(data)
+			} else {
+				data := map[string]string{}
+				err = json.Unmarshal(by, &data)
+				if err != nil {
+					return err
+				}
+				RegisterTrans(fileName, data)
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	// code文件为状态码,其他为对应的语言文件，文件名为语言名
+	return nil
 }
 
 // 获取翻译

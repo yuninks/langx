@@ -18,6 +18,7 @@ func defaultOptions() *options {
 
 type Option func(*options)
 
+// 设置默认的code
 func SetDefaultCode(code int) Option {
 	return func(o *options) {
 		o.defaultCode = code
@@ -38,7 +39,7 @@ func SetDefaultLanguage(lang string) Option {
 	}
 }
 
-// 替换规则 %s 为占位符
+// 替换规则 %s 为占位符 需要填进去
 func SetReplaceKey(key string) Option {
 	return func(o *options) {
 		o.replaceKey = key

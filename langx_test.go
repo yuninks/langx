@@ -6,11 +6,23 @@ import (
 	"github.com/yuninks/langx"
 )
 
+const(
+	Lang string = "s"
+)
+
+var MapCode = map[string]int{
+	Lang:200,
+}
+
+
 func TestLangx(t *testing.T) {
 	langx.InitLangx(
 		langx.SetDefaultCode(0),
 		langx.SetDefaultLanguage("zh"),
 	)
+
+	
+
 	langx.RegisterCode(map[string]int{
 		"login_success": 200,
 		"error":         400,
