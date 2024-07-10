@@ -44,10 +44,9 @@ func RegisterTrans(langName string, trans map[string]string) {
 	l.transMap[langName] = trans
 }
 
-
 // 直接读取文件夹获取配置
 // 要求：
-// 1.json格式文件 
+// 1.json格式文件
 // 2.code.json为自定义响应码 格式map[string]int{}
 // 3.其他的json文件为对应语音 格式map[string]string{}
 // 4.如果json解析错误将会panic
@@ -94,10 +93,22 @@ func RegisterDir(dir string) error {
 
 // 获取翻译
 // 包含Code和Message
-func GetTrans(lang string, key string, format map[string]string) (code int, str string) {
+func GetTransFormat(lang string, key string, format map[string]string) (code int, str string) {
 	code = GetCode(key)
 	str = GetFormat(lang, key, format)
 	return
+}
+
+func GetTrans(lang string, key string) (code int, str string) {
+	return GetTransFormat(lang, key, map[string]string{})
+}
+
+func GetTransCtx(ctx context.Context, key string) (code int, str string) {
+	return GetTrans(getLangFromCtx(ctx), key)
+}
+
+func GetTransFormatCtx(ctx context.Context, key string, format map[string]string) (code int, str string) {
+	return GetTransFormat(getLangFromCtx(ctx), key, format)
 }
 
 // 根据Key获取code
@@ -133,12 +144,7 @@ func GetMsg(lang string, key string) string {
 
 // 从ctx里面获取语言
 func GetMsgCtx(ctx context.Context, key string) string {
-	ctxVal := ctx.Value(l.ops.ctxLangKey)
-	lang := l.ops.defaultLang
-	if ctxVal != nil {
-		lang = ctxVal.(string)
-	}
-	return GetMsg(lang, key)
+	return GetMsg(getLangFromCtx(ctx), key)
 }
 
 // 拼接回复
@@ -150,7 +156,20 @@ func GetFormat(lang string, key string, arr map[string]string) string {
 	return str
 }
 
+func GetFormatCtx(ctx context.Context, key string, arr map[string]string) string {
+	return GetFormat(getLangFromCtx(ctx), key, arr)
+}
+
 // 获取默认Code
 func GetDefaultCode() int {
 	return l.ops.defaultCode
+}
+
+func getLangFromCtx(ctx context.Context) string {
+	ctxVal := ctx.Value(l.ops.ctxLangKey)
+	lang := l.ops.defaultLang
+	if ctxVal != nil {
+		lang = ctxVal.(string)
+	}
+	return lang
 }
