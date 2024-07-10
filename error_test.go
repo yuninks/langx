@@ -37,7 +37,7 @@ func TestError(t *testing.T) {
 	t.Log(err.Error())
 	val, ok := err.(*langx.LangError)
 	if ok {
-		t.Log(val.Code())
+		t.Log(val.GetCode())
 	}
 
 	err = langx.NewErrorFormat(ctx, "username", map[string]string{
@@ -46,7 +46,7 @@ func TestError(t *testing.T) {
 	t.Log(err.Error())
 	val, ok = err.(*langx.LangError)
 	if ok {
-		t.Log(val.Code())
+		t.Log(val.GetCode())
 	}
 
 }

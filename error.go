@@ -23,8 +23,19 @@ func (e *LangError) Error() string {
 	return GetFormat(l, e.key, e.format)
 }
 
-func (e *LangError) Code() int {
+func (e *LangError) GetCode() int {
 	return GetCode(e.key)
+}
+
+func (e *LangError) GetMsg() string {
+	return e.key
+}
+
+func (e *LangError) GetFormat() map[string]string {
+	if e.format == nil {
+		e.format = make(map[string]string)
+	}
+	return e.format
 }
 
 func NewErrorFormat(ctx context.Context, key string, format map[string]string) error {
