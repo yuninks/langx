@@ -2,6 +2,7 @@ package langx
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -83,12 +84,88 @@ func RegisterDir(dir string) error {
 		return nil
 	})
 
+	// code文件为状态码,其他为对应的语言文件，文件名为语言名
+	return err
+}
+
+func RegisterEmbed(asset embed.FS) error {
+	paths, err := readEmbedAllPath(asset, "")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	// code文件为状态码,其他为对应的语言文件，文件名为语言名
+	for _, ff := range paths {
+		// 获取文件的后缀
+
+		fileName := strings.Replace(ff.path, ".json", "", 1)
+		if fileName == "code" {
+			data := map[string]int{}
+			err = json.Unmarshal(ff.datas, &data)
+			if err != nil {
+				return err
+			}
+			RegisterCode(data)
+		} else {
+			data := map[string]string{}
+			err = json.Unmarshal(ff.datas, &data)
+			if err != nil {
+				return err
+			}
+			RegisterTrans(fileName, data)
+		}
+	}
+
 	return nil
+}
+
+type fileData struct {
+	path  string
+	datas []byte
+}
+
+func readEmbedAllPath(asset embed.FS, path string) ([]fileData, error) {
+	newRoot := ""
+	if path == "" {
+		newRoot = "."
+	} else {
+		newRoot = path
+	}
+
+	fs, err := asset.ReadDir(newRoot)
+	if err != nil {
+		return nil, err
+	}
+	var files []fileData
+	for _, f := range fs {
+		if f.IsDir() {
+			chaild := ""
+			if newRoot == "." {
+				chaild = f.Name()
+			} else {
+				chaild = newRoot + "/" + f.Name()
+			}
+
+			df, err := readEmbedAllPath(asset, chaild)
+			if err != nil {
+				return nil, err
+			}
+			files = append(files, df...)
+			continue
+		}
+
+		by, err := asset.ReadFile(newRoot + "/" + f.Name())
+		if err != nil {
+			return nil, err
+		}
+
+		ff := fileData{
+			path:  f.Name(),
+			datas: by,
+		}
+
+		files = append(files, ff)
+	}
+	return files, nil
 }
 
 // 获取翻译
