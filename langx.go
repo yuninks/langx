@@ -9,12 +9,14 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 type langx struct {
 	ops      *options
 	codeMap  map[string]int
 	transMap map[string]map[string]string
+	mut      sync.Mutex
 }
 
 var l *langx = &langx{}
@@ -25,6 +27,7 @@ func init() {
 		ops:      defaultOptions(),
 		codeMap:  make(map[string]int),
 		transMap: make(map[string]map[string]string),
+		mut:      sync.Mutex{},
 	}
 }
 
@@ -37,12 +40,34 @@ func InitLangx(ops ...Option) {
 
 // 这是语言的Code
 func RegisterCode(datas map[string]int) {
+	l.mut.Lock()
+	defer l.mut.Unlock()
 	l.codeMap = datas
+}
+
+// 追加覆盖Code
+func AppendCode(datas map[string]int) {
+	l.mut.Lock()
+	defer l.mut.Unlock()
+	for k, v := range datas {
+		l.codeMap[k] = v
+	}
 }
 
 // 注册语言翻译
 func RegisterTrans(langName string, trans map[string]string) {
+	l.mut.Lock()
+	defer l.mut.Unlock()
 	l.transMap[langName] = trans
+}
+
+// 追加覆盖翻译
+func AppendTrans(langName string, trans map[string]string) {
+	l.mut.Lock()
+	defer l.mut.Unlock()
+	for k, v := range trans {
+		l.transMap[langName][k] = v
+	}
 }
 
 // 直接读取文件夹获取配置
@@ -190,6 +215,8 @@ func GetTransFormatCtx(ctx context.Context, key string, format map[string]string
 
 // 根据Key获取code
 func GetCode(key string) int {
+	l.mut.Lock()
+	defer l.mut.Unlock()
 	code, ok := l.codeMap[key]
 	if !ok {
 		return l.ops.defaultCode
@@ -199,6 +226,8 @@ func GetCode(key string) int {
 
 // 获取翻译
 func GetMsg(lang string, key string) string {
+	l.mut.Lock()
+	defer l.mut.Unlock()
 	// 找指定语言
 	str, ok := l.transMap[lang]
 	if ok {
