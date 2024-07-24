@@ -66,6 +66,9 @@ func AppendTrans(langName string, trans map[string]string) {
 	l.mut.Lock()
 	defer l.mut.Unlock()
 	for k, v := range trans {
+		if l.transMap[langName] == nil {
+			l.transMap[langName] = map[string]string{}
+		}
 		l.transMap[langName][k] = v
 	}
 }
