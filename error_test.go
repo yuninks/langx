@@ -35,7 +35,7 @@ func TestError(t *testing.T) {
 	err = langx.NewError(ctx, "error")
 	// fmt.Printf("err: %v\n", err)
 	t.Log(err.Error())
-	val, ok := err.(*langx.LangError)
+	val, ok := err.(langx.LangError)
 	if ok {
 		t.Log(val.GetCode())
 	}
@@ -44,7 +44,7 @@ func TestError(t *testing.T) {
 		"name": "yuninks",
 	})
 	t.Log(err.Error())
-	val, ok = err.(*langx.LangError)
+	val, ok = err.(langx.LangError)
 	if ok {
 		t.Log(val.GetCode())
 	}

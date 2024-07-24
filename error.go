@@ -4,7 +4,16 @@ import (
 	"context"
 )
 
-type LangError struct {
+type LangError interface {
+	NewError(ctx context.Context, key string) error
+	NewErrorFormat(ctx context.Context, key string, format map[string]string) error
+	Error() string
+	GetCode() int
+	GetMsg() string
+	GetFormat() map[string]string
+}
+
+type langError struct {
 	ctx    context.Context
 	key    string
 	format map[string]string
@@ -14,7 +23,7 @@ type errorConst string
 
 const errorLang errorConst = "errorLang"
 
-func (e *LangError) Error() string {
+func (e *langError) Error() string {
 	errLang := e.ctx.Value(errorLang)
 	l := ""
 	if errLang != nil {
@@ -23,15 +32,15 @@ func (e *LangError) Error() string {
 	return GetFormat(l, e.key, e.format)
 }
 
-func (e *LangError) GetCode() int {
+func (e *langError) GetCode() int {
 	return GetCode(e.key)
 }
 
-func (e *LangError) GetMsg() string {
+func (e *langError) GetMsg() string {
 	return e.key
 }
 
-func (e *LangError) GetFormat() map[string]string {
+func (e *langError) GetFormat() map[string]string {
 	if e.format == nil {
 		e.format = make(map[string]string)
 	}
@@ -39,7 +48,7 @@ func (e *LangError) GetFormat() map[string]string {
 }
 
 func NewErrorFormat(ctx context.Context, key string, format map[string]string) error {
-	return &LangError{
+	return &langError{
 		ctx:    ctx,
 		key:    key,
 		format: format,
@@ -47,7 +56,7 @@ func NewErrorFormat(ctx context.Context, key string, format map[string]string) e
 }
 
 func NewError(ctx context.Context, key string) error {
-	return &LangError{
+	return &langError{
 		ctx: ctx,
 		key: key,
 	}
