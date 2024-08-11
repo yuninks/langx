@@ -16,6 +16,13 @@ func defaultOptions() *options {
 	}
 }
 
+// 设置
+func InitLangx(ops ...Option) {
+	for _, opt := range ops {
+		opt(l.ops)
+	}
+}
+
 type Option func(*options)
 
 // 设置默认的code

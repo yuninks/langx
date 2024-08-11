@@ -31,13 +31,6 @@ func init() {
 	}
 }
 
-// 设置
-func InitLangx(ops ...Option) {
-	for _, opt := range ops {
-		opt(l.ops)
-	}
-}
-
 // 这是语言的Code
 func RegisterCode(datas map[string]int) {
 	l.mut.Lock()

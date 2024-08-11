@@ -5,8 +5,6 @@ import (
 )
 
 type LangError interface {
-	NewError(ctx context.Context, key string) error                                 // New错误
-	NewErrorFormat(ctx context.Context, key string, format map[string]string) error // New错误
 	Error() string                                                                  // 实现error接口&获取翻译后的错误信息
 	GetCode() int                                                                   // 获取翻译后的Code
 	GetKey() string                                                                 // 获取原Key值
