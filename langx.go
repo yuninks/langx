@@ -267,6 +267,11 @@ func GetDefaultCode() int {
 	return l.ops.defaultCode
 }
 
+// 获取默认语言
+func GetDefaultLang() string {
+	return l.ops.defaultLang
+}
+
 func getLangFromCtx(ctx context.Context) string {
 	ctxVal := ctx.Value(l.ops.ctxLangKey)
 	lang := l.ops.defaultLang
