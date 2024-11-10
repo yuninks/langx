@@ -33,7 +33,7 @@ func (l Language) Error() error {
 }
 
 func (l Language) Errorf(format map[string]string) error {
-	return langx.NewErrorFormat(context.Background(), l.String(), format)
+	return langx.NewErrorf(context.Background(), l.String(), format)
 }
 
 var (
