@@ -4,6 +4,8 @@ import (
 	"context"
 )
 
+// Key生成错误信息
+
 type LangError interface {
 	Error() string                // 实现error接口&获取翻译后的错误信息
 	GetCode() int                 // 获取翻译后的Code
@@ -11,6 +13,8 @@ type LangError interface {
 	GetFormat() map[string]string // 获取附加数据
 	SetLang(lang string)          // 设置语言
 }
+
+
 
 type langError struct {
 	ctx    context.Context
