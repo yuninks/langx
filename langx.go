@@ -16,7 +16,7 @@ type langx struct {
 	ops      *options
 	codeMap  map[string]int
 	transMap map[string]map[string]string
-	mut      sync.Mutex
+	mut      sync.RWMutex
 }
 
 var l *langx = &langx{}
@@ -27,7 +27,7 @@ func init() {
 		ops:      defaultOptions(),
 		codeMap:  make(map[string]int),
 		transMap: make(map[string]map[string]string),
-		mut:      sync.Mutex{},
+		mut:      sync.RWMutex{},
 	}
 }
 
@@ -211,8 +211,8 @@ func GetTransFormatCtx(ctx context.Context, key string, format map[string]string
 
 // 根据Key获取code
 func GetCode(key string) int {
-	l.mut.Lock()
-	defer l.mut.Unlock()
+	l.mut.RLock()
+	defer l.mut.RUnlock()
 	code, ok := l.codeMap[key]
 	if !ok {
 		return l.ops.defaultCode
@@ -222,8 +222,8 @@ func GetCode(key string) int {
 
 // 获取翻译
 func GetMsg(lang string, key string) string {
-	l.mut.Lock()
-	defer l.mut.Unlock()
+	l.mut.RLock()
+	defer l.mut.RUnlock()
 	// 找指定语言
 	str, ok := l.transMap[lang]
 	if ok {
