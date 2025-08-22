@@ -5,10 +5,13 @@ import (
 )
 
 type LangError interface {
-	Error() string                                                                  // 实现error接口&获取翻译后的错误信息
-	GetCode() int                                                                   // 获取翻译后的Code
-	GetKey() string                                                                 // 获取原Key值
-	GetFormat() map[string]string                                                   // 获取附加数据
+	Copy() LangError                    // 复制错误信息
+	Error() string                      // 实现error接口&获取翻译后的错误信息
+	GetCode() int                       // 获取翻译后的Code
+	GetKey() string                     // 获取原Key值
+	GetFormat() map[string]string       // 获取附加数据
+	SetFormat(format map[string]string) // 设置附加数据
+	SetCtx(ctxhttp context.Context)     // 设置上下文
 }
 
 type langError struct {
@@ -17,13 +20,19 @@ type langError struct {
 	format map[string]string
 }
 
-type errorConst string
+func (l *langError) Copy() LangError {
+	return &langError{
+		ctx:    l.ctx,
+		key:    l.key,
+		format: l.format,
+	}
+}
 
 func (e *langError) Error() string {
-	errLang := e.ctx.Value(errorLang)
+	errLang := e.ctx.Value("Accept-Language")
 	l := ""
 	if errLang != nil {
-		l = string(errLang.(errorConst))
+		l = string(errLang.(string))
 	}
 	return GetFormat(l, e.key, e.format)
 }
@@ -43,6 +52,14 @@ func (e *langError) GetFormat() map[string]string {
 	return e.format
 }
 
+func (e *langError) SetFormat(format map[string]string) {
+	e.format = format
+}
+
+func (e *langError) SetCtx(ctx context.Context) {
+	e.ctx = ctx
+}
+
 func NewErrorFormat(ctx context.Context, key string, format map[string]string) error {
 	return &langError{
 		ctx:    ctx,
@@ -58,8 +75,6 @@ func NewError(ctx context.Context, key string) error {
 	}
 }
 
-const errorLang errorConst = "errorLang"
-
 func SetCtxLang(ctx context.Context, lang string) context.Context {
-	return context.WithValue(ctx, errorLang, lang)
+	return context.WithValue(ctx, "Accept-Language", lang)
 }
