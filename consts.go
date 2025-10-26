@@ -4,43 +4,51 @@ import "context"
 
 // 定义错误常量
 
-type ErrorLanguage string
+type ErrorLanguage struct {
+	LangError
+}
 
 // 生成错误常量
 func NewLanguage(uniKey string, code int, defaultValue string) ErrorLanguage {
 	AppendCode(map[string]int{uniKey: code})
-	AppendTrans("zh_hans", map[string]string{uniKey: defaultValue})
-	return ErrorLanguage(uniKey)
-}
+	AppendTrans(GetDefaultLang(), map[string]string{uniKey: defaultValue})
 
-// 获取原key
-func (l ErrorLanguage) String() string {
-	return string(l)
+	l := NewErrorStruct(context.Background(), uniKey, nil)
+
+	return ErrorLanguage{l}
 }
 
 // Key生成错误信息
 func (l ErrorLanguage) Err() error {
-	return NewError(context.Background(), l.String())
+	return l
 }
 
 // Key生成错误信息
 func (l ErrorLanguage) Errf(format map[string]string) error {
-	return NewErrorf(context.Background(), l.String(), format)
+	newLang := l.Copy()
+	newLang.SetFormat(format)
+	return newLang
 }
 
-// 获取翻译后的Code
-func (l ErrorLanguage) Code() int {
-	return GetCode(l.String())
+func (l ErrorLanguage) ErrfKV(key, value string) error {
+	newLang := l.Copy()
+	newLang.SetFormatKV(key, value)
+	return newLang
 }
 
 // 获取翻译后的错误信息
 func (l ErrorLanguage) Msg(ctx context.Context) string {
-	return GetFormatCtx(ctx, l.String(), nil)
+	newLang := l.Copy()
+	newLang.SetCtx(ctx)
+	return newLang.Error()
 }
 
 // 获取翻译后的错误信息
 func (l ErrorLanguage) Msgf(ctx context.Context, format map[string]string) string {
-	return GetFormatCtx(ctx, l.String(), format)
+	newLang := l.Copy()
+	newLang.SetCtx(ctx)
+	newLang.SetFormat(format)
+	return newLang.Error()
 }
 
 var (
