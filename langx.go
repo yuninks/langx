@@ -19,22 +19,20 @@ type langx struct {
 	mut      sync.RWMutex
 }
 
-var l *langx = &langx{}
-
-func init() {
-
-	l = &langx{
-		ops:      defaultOptions(),
-		codeMap:  make(map[string]int),
-		transMap: make(map[string]map[string]string),
-		mut:      sync.RWMutex{},
-	}
+var l *langx = &langx{
+	ops:      defaultOptions(),
+	codeMap:  make(map[string]int),
+	transMap: make(map[string]map[string]string),
+	mut:      sync.RWMutex{},
 }
 
 // 这是语言的Code
 func RegisterCode(datas map[string]int) {
 	l.mut.Lock()
 	defer l.mut.Unlock()
+	if datas == nil {
+		datas = make(map[string]int)
+	}
 	l.codeMap = datas
 }
 
@@ -42,6 +40,14 @@ func RegisterCode(datas map[string]int) {
 func AppendCode(datas map[string]int) {
 	l.mut.Lock()
 	defer l.mut.Unlock()
+
+	if datas == nil {
+		datas = make(map[string]int)
+	}
+	if l.codeMap == nil {
+		l.codeMap = map[string]int{}
+	}
+
 	for k, v := range datas {
 		l.codeMap[k] = v
 	}
