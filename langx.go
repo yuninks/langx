@@ -273,10 +273,9 @@ func GetDefaultLang() string {
 }
 
 func getLangFromCtx(ctx context.Context) string {
-	ctxVal := ctx.Value(l.ops.ctxLangKey)
-	lang := l.ops.defaultLang
-	if ctxVal != nil {
-		lang = ctxVal.(string)
+	lang := GetCtxLang(ctx)
+	if lang == "" {
+		lang = l.ops.defaultLang
 	}
 	return lang
 }

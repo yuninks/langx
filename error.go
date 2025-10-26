@@ -4,14 +4,18 @@ import (
 	"context"
 )
 
+// Key生成错误信息
+
 type LangError interface {
-	Copy() LangError                    // 复制错误信息
+	Copy() LangError                    // 复制一个新的错误信息
 	Error() string                      // 实现error接口&获取翻译后的错误信息
 	GetCode() int                       // 获取翻译后的Code
 	GetKey() string                     // 获取原Key值
 	GetFormat() map[string]string       // 获取附加数据
 	SetFormat(format map[string]string) // 设置附加数据
-	SetCtx(ctxhttp context.Context)     // 设置上下文
+	SetCtx(ctxHttp context.Context)     // 设置上下文
+	SetLang(lang string)                // 设置语言
+	SetFormatKV(key, value string)      // 设置附加数据键值对
 }
 
 type langError struct {
@@ -28,13 +32,24 @@ func (l *langError) Copy() LangError {
 	}
 }
 
-func (e *langError) Error() string {
-	errLang := e.ctx.Value("Accept-Language")
-	l := ""
-	if errLang != nil {
-		l = string(errLang.(string))
+func (e *langError) SetFormat(format map[string]string) {
+	e.format = format
+}
+
+func (l *langError) SetFormatKV(key, value string) {
+	if l.format == nil {
+		l.format = make(map[string]string)
 	}
-	return GetFormat(l, e.key, e.format)
+	l.format[key] = value
+}
+
+func (e *langError) SetCtx(ctxHttp context.Context) {
+	e.ctx = ctxHttp
+}
+
+func (l *langError) Error() string {
+	errLang := GetCtxLang(l.ctx)
+	return GetFormat(errLang, l.key, l.format)
 }
 
 func (e *langError) GetCode() int {
@@ -52,15 +67,11 @@ func (e *langError) GetFormat() map[string]string {
 	return e.format
 }
 
-func (e *langError) SetFormat(format map[string]string) {
-	e.format = format
+func (e *langError) SetLang(lang string) {
+	e.ctx = SetCtxLang(e.ctx, lang)
 }
 
-func (e *langError) SetCtx(ctx context.Context) {
-	e.ctx = ctx
-}
-
-func NewErrorFormat(ctx context.Context, key string, format map[string]string) error {
+func NewErrorf(ctx context.Context, key string, format map[string]string) error {
 	return &langError{
 		ctx:    ctx,
 		key:    key,
@@ -75,6 +86,10 @@ func NewError(ctx context.Context, key string) error {
 	}
 }
 
-func SetCtxLang(ctx context.Context, lang string) context.Context {
-	return context.WithValue(ctx, "Accept-Language", lang)
+func NewStruct(ctx context.Context, key string, format map[string]string) LangError {
+	return &langError{
+		ctx:    ctx,
+		key:    key,
+		format: format,
+	}
 }

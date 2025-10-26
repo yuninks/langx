@@ -40,13 +40,19 @@ func TestError(t *testing.T) {
 		t.Log(val.GetCode())
 	}
 
-	err = langx.NewErrorFormat(ctx, "username", map[string]string{
+	err = langx.NewErrorf(ctx, "username", map[string]string{
 		"name": "yuninks",
 	})
 	t.Log(err.Error())
 	val, ok = err.(langx.LangError)
 	if ok {
 		t.Log(val.GetCode())
+
+		// 设置输出语言
+		val.SetLang("en")
+
 	}
+
+	t.Log(val.Error())
 
 }
